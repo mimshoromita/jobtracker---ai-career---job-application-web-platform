@@ -1,0 +1,6 @@
+{
+  "name": "JobTracker — AI Career & Job Application Web Platform",
+  "description": "An AI-powered career and job tracking web platform with candidate/recruiter/admin roles, job marketplace, CV builder with PDF export, and TF-IDF skill-gap matching.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

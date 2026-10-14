@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global security primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'mimshoromita@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Health / connection test doc
+    match /test/{testId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admins registry
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Jobs marketplace
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (request.resource.data.recruiterId == request.auth.uid || isAdmin());
+      allow update: if isSignedIn() && (
+        resource.data.recruiterId == request.auth.uid || 
+        isAdmin() ||
+        // Allow applicant count increment when applying
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['applicantsCount', 'updatedAt']))
+      );
+      allow delete: if isSignedIn() && (resource.data.recruiterId == request.auth.uid || isAdmin());
+    }
+
+    // Applications & tracking pipeline
+    match /applications/{appId} {
+      allow read: if isSignedIn() && (
+        resource.data.candidateId == request.auth.uid ||
+        resource.data.recruiterId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.candidateId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        resource.data.recruiterId == request.auth.uid ||
+        resource.data.candidateId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isSignedIn() && (
+        resource.data.candidateId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // CVs collection
+    match /cvs/{cvId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // Recent activity feed collection
+    match /activities/{activityId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    // Saved jobs bookmarks collection
+    match /saved_jobs/{savedJobId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile containing authentication details, role, and professional contact data",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "displayName": { "type": "string", "maxLength": 100, "description": "Full name" },
+        "role": { "type": "string", "enum": ["candidate", "recruiter", "admin"], "description": "System role" },
+        "headline": { "type": "string", "maxLength": 200, "description": "Professional headline" },
+        "bio": { "type": "string", "maxLength": 1000, "description": "Short biography" },
+        "phone": { "type": "string", "maxLength": 30, "description": "Phone number" },
+        "location": { "type": "string", "maxLength": 100, "description": "City or Country" },
+        "skills": { "type": "array", "description": "List of core skills" },
+        "company": { "type": "string", "maxLength": 100, "description": "Company name if recruiter" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["userId", "email", "role", "displayName"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Job posting created by recruiters or admins",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 150, "description": "Job title" },
+        "company": { "type": "string", "maxLength": 100, "description": "Company hiring" },
+        "location": { "type": "string", "maxLength": 100, "description": "Workplace location or Remote" },
+        "type": { "type": "string", "enum": ["Full-time", "Part-time", "Remote", "Contract", "Internship"] },
+        "department": { "type": "string", "maxLength": 100, "description": "Business department or domain" },
+        "experienceLevel": { "type": "string", "enum": ["Entry Level", "Mid Level", "Senior Level", "Lead", "Executive"] },
+        "salaryRange": { "type": "string", "maxLength": 100, "description": "Expected salary compensation" },
+        "description": { "type": "string", "maxLength": 5000, "description": "Job description and responsibilities" },
+        "requiredSkills": { "type": "array", "description": "Required competencies" },
+        "preferredSkills": { "type": "array", "description": "Bonus / preferred competencies" },
+        "status": { "type": "string", "enum": ["open", "closed"] },
+        "recruiterId": { "type": "string", "description": "UID of posting recruiter" },
+        "recruiterName": { "type": "string", "maxLength": 100, "description": "Name of recruiter" },
+        "recruiterEmail": { "type": "string", "format": "email", "description": "Email of recruiter" },
+        "applicantsCount": { "type": "number", "description": "Total candidates applied" },
+        "createdAt": { "type": "string", "description": "Timestamp created" },
+        "updatedAt": { "type": "string", "description": "Timestamp updated" }
+      },
+      "required": ["title", "company", "location", "type", "description", "recruiterId", "status"]
+    },
+    "Application": {
+      "title": "Application",
+      "description": "Job application submitted by a candidate",
+      "type": "object",
+      "properties": {
+        "jobId": { "type": "string", "description": "Referenced Job ID" },
+        "jobTitle": { "type": "string", "maxLength": 150, "description": "Job title snapshot" },
+        "company": { "type": "string", "maxLength": 100, "description": "Company snapshot" },
+        "candidateId": { "type": "string", "description": "Candidate UID" },
+        "candidateName": { "type": "string", "maxLength": 100, "description": "Candidate full name" },
+        "candidateEmail": { "type": "string", "format": "email", "description": "Candidate email" },
+        "recruiterId": { "type": "string", "description": "Recruiter UID of the job" },
+        "cvId": { "type": "string", "description": "Referenced CV ID" },
+        "cvSummary": { "type": "string", "maxLength": 2000, "description": "CV summary at application time" },
+        "candidateSkills": { "type": "array", "description": "Skills snapshot" },
+        "matchScore": { "type": "number", "description": "Calculated TF-IDF match score 0-100" },
+        "status": { "type": "string", "enum": ["submitted", "under_review", "interview", "offer", "rejected", "withdrawn"] },
+        "notes": { "type": "string", "maxLength": 1000, "description": "Latest recruiter feedback or interview note" },
+        "statusHistory": { "type": "array", "description": "Historical audit log of status progressions" },
+        "createdAt": { "type": "string", "description": "Timestamp submitted" },
+        "updatedAt": { "type": "string", "description": "Timestamp last updated" }
+      },
+      "required": ["jobId", "candidateId", "recruiterId", "status"]
+    },
+    "CV": {
+      "title": "CV",
+      "description": "Structured curriculum vitae created by a candidate",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner candidate UID" },
+        "title": { "type": "string", "maxLength": 100, "description": "CV profile title (e.g., Senior Full Stack Resume)" },
+        "fullName": { "type": "string", "maxLength": 100, "description": "Full name" },
+        "email": { "type": "string", "format": "email", "description": "Contact email" },
+        "phone": { "type": "string", "maxLength": 30, "description": "Contact phone" },
+        "location": { "type": "string", "maxLength": 100, "description": "City, Country" },
+        "targetRole": { "type": "string", "maxLength": 100, "description": "Target job title" },
+        "summary": { "type": "string", "maxLength": 2000, "description": "Executive summary" },
+        "skills": { "type": "array", "description": "Skill tags" },
+        "experience": { "type": "array", "description": "Work history list" },
+        "education": { "type": "array", "description": "Education history list" },
+        "projects": { "type": "array", "description": "Key projects list" },
+        "certifications": { "type": "array", "description": "Certifications list" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last updated timestamp" }
+      },
+      "required": ["userId", "fullName", "email"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "Recent activity feed event logging application updates, saved jobs, and profile milestones",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Target user UID" },
+        "type": { "type": "string", "enum": ["application_update", "job_saved", "job_unsaved", "profile_milestone", "cv_updated"], "description": "Event classification" },
+        "title": { "type": "string", "maxLength": 150, "description": "Event headline" },
+        "description": { "type": "string", "maxLength": 500, "description": "Event detail narrative" },
+        "timestamp": { "type": "string", "description": "Event timestamp" },
+        "metadata": { "type": "string", "description": "JSON string or details map" }
+      },
+      "required": ["userId", "type", "title", "timestamp"]
+    },
+    "SavedJob": {
+      "title": "SavedJob",
+      "description": "Bookmark reference linking a candidate to a saved job",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "User UID" },
+        "jobId": { "type": "string", "description": "Saved Job ID" },
+        "jobTitle": { "type": "string", "maxLength": 150, "description": "Job title cache" },
+        "company": { "type": "string", "maxLength": 100, "description": "Company name cache" },
+        "createdAt": { "type": "string", "description": "Timestamp saved" }
+      },
+      "required": ["userId", "jobId"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Authoritative administrator designation",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "description": "Admin email" },
+        "assignedAt": { "type": "string", "description": "Timestamp assigned" }
+      },
+      "required": ["email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles including role and career details"
+    },
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Job marketplace postings created by recruiters or admins"
+    },
+    "/applications/{applicationId}": {
+      "schema": "Application",
+      "description": "Candidate job applications and pipeline tracking"
+    },
+    "/cvs/{cvId}": {
+      "schema": "CV",
+      "description": "Candidate CV records used for applications, export, and TF-IDF matching"
+    },
+    "/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Candidate recent activity feed events for real-time snapshots"
+    },
+    "/saved_jobs/{savedJobId}": {
+      "schema": "SavedJob",
+      "description": "Candidate bookmarked and saved job opportunities"
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminRecord",
+      "description": "Platform administrators list"
+    }
+  }
+}
